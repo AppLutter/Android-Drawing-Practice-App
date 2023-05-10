@@ -24,13 +24,13 @@ class MainActivity : AppCompatActivity() {
     private var drawingView: DrawingView? = null
     private var mImageButtonCurrentPaint: ImageButton? = null
 
-    val openGalleryLauncher:ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
-        result ->
-        if(result.resultCode== RESULT_OK && result.data !=null){
-            val imageBackground:ImageView = findViewById(R.id.iv_background)
-            imageBackground.setImageURI(result.data?.data)
+    val openGalleryLauncher: ActivityResultLauncher<Intent> =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK && result.data != null) {
+                val imageBackground: ImageView = findViewById(R.id.iv_background)
+                imageBackground.setImageURI(result.data?.data)
+            }
         }
-    }
 
     val requestPermission: ActivityResultLauncher<Array<String>> =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
                         "파일 읽기 권한 승인 완료", Toast.LENGTH_LONG
                     ).show()
 
-                    val pickIntend = Intent(Intent.ACTION_PICK,Media.EXTERNAL_CONTENT_URI)
+                    val pickIntend = Intent(Intent.ACTION_PICK, Media.EXTERNAL_CONTENT_URI)
 
                     openGalleryLauncher.launch(pickIntend)
                 } else {
@@ -75,6 +75,11 @@ class MainActivity : AppCompatActivity() {
         val ibBrush: ImageButton = findViewById<ImageButton>(R.id.ib_brush)
         ibBrush.setOnClickListener {
             showBrushSizeChooserDialog()
+        }
+
+        val ibUndo: ImageButton = findViewById(R.id.ib_undo)
+        ibUndo.setOnClickListener {
+            drawingView?.onClickUndo()
         }
 
         val ibGallery: ImageButton = findViewById(R.id.ib_gallery)
