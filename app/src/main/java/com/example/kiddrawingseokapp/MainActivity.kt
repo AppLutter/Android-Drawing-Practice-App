@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.media.MediaScannerConnection
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
@@ -36,7 +37,7 @@ import java.lang.Exception
 class MainActivity : AppCompatActivity() {
     private var drawingView: DrawingView? = null
     private var mImageButtonCurrentPaint: ImageButton? = null
-    var customProgressDialog :Dialog? = null
+    var customProgressDialog: Dialog? = null
 
     val openGalleryLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -58,7 +59,8 @@ class MainActivity : AppCompatActivity() {
                         "파일 읽기 권한 승인 완료", Toast.LENGTH_LONG
                     ).show()
 
-                    val pickIntend = Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                    val pickIntend =
+                        Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
 
                     openGalleryLauncher.launch(pickIntend)
                 } else {
@@ -154,6 +156,7 @@ class MainActivity : AppCompatActivity() {
                                 "파일 저장 성공 : $result",
                                 Toast.LENGTH_LONG
                             ).show()
+                            sharedImage(result)
                         }
                     }
                 } catch (e: Exception) {
@@ -243,16 +246,26 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun showProgressDialog(){
+    private fun showProgressDialog() {
         customProgressDialog = Dialog(this@MainActivity)
         customProgressDialog?.setContentView(R.layout.dialog_custom_progress)
         customProgressDialog?.show()
     }
 
-    private fun cancelProgressDialog(){
-        if(customProgressDialog != null){
+    private fun cancelProgressDialog() {
+        if (customProgressDialog != null) {
             customProgressDialog?.dismiss()
             customProgressDialog = null
+        }
+    }
+
+    private fun sharedImage(result: String) {
+        MediaScannerConnection.scanFile(this, arrayOf(result), null) { path, uri ->
+            val shareIntent = Intent()
+            shareIntent.action = Intent.ACTION_SEND
+            shareIntent.putExtra(Intent.EXTRA_STREAM, uri)
+            shareIntent.type = "image/png"
+            startActivity(Intent.createChooser(shareIntent, "Share"))
         }
     }
 }
