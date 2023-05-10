@@ -2,10 +2,14 @@ package com.example.kiddrawingseokapp
 
 import android.Manifest
 import android.app.Dialog
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
+import android.provider.MediaStore.Images.Media
 import android.view.View
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -19,6 +23,15 @@ import androidx.core.view.get
 class MainActivity : AppCompatActivity() {
     private var drawingView: DrawingView? = null
     private var mImageButtonCurrentPaint: ImageButton? = null
+
+    val openGalleryLauncher:ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
+        result ->
+        if(result.resultCode== RESULT_OK && result.data !=null){
+            val imageBackground:ImageView = findViewById(R.id.iv_background)
+            imageBackground.setImageURI(result.data?.data)
+        }
+    }
+
     val requestPermission: ActivityResultLauncher<Array<String>> =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             permissions.entries.forEach {
@@ -30,6 +43,10 @@ class MainActivity : AppCompatActivity() {
                         this@MainActivity,
                         "파일 읽기 권한 승인 완료", Toast.LENGTH_LONG
                     ).show()
+
+                    val pickIntend = Intent(Intent.ACTION_PICK,Media.EXTERNAL_CONTENT_URI)
+
+                    openGalleryLauncher.launch(pickIntend)
                 } else {
                     if (permissionName == Manifest.permission.READ_EXTERNAL_STORAGE) {
                         Toast.makeText(
